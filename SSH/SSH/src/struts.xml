@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+    <!--action的创建交给spring-->
+    <!--struts.objectFactory = spring-->
+    <!--spring负责装配Action的属性-->
+    <!--struts.objectFactory.spring.autoWire = name-->
+
+    <constant name="struts.objectFactory" value="spring"></constant>
+    <constant name="struts.objectFactory.spring.autoWire" value="name"></constant>
+
+    <constant name="struts.devMode" value="true"></constant>
+
+   <package name="main" namespace="/" extends="struts-default">
+       <action name="userAction_*" class="userAction" method="{1}">
+           <result name="success">/index.jsp</result>
+       </action>
+   </package>
+
+
+</struts>

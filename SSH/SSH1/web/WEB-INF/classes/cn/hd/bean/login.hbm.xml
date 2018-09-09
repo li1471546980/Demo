@@ -1,0 +1,11 @@
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="cn.hd.bean.Login" table="login">
+        <id name="id" column="id">
+            <generator class="native"></generator>
+        </id>
+        <property name="psd" column="psd"></property>
+    </class>
+</hibernate-mapping>

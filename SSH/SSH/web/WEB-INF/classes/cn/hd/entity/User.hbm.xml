@@ -1,0 +1,36 @@
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <!--class中的name代表的是实体类名，table代表的是数据库表名-->
+    <class name="cn.hd.entity.User" table="user">
+
+        <!--主键对应的是实体类里面的id，和数据库表中的主键
+        name代表的是实体类中的名字，column代表的是表里面的字段名（可以省略不写）-->
+        <id name="uid" column="uid">
+            <!--主键生成策略-->
+            <!--代理主键和自然主键
+                主键生成策略：
+                    identity 是由于数据库自己维护 自动上涨
+                    increment 是由于数据库自己维护 查找最大的id 然后在之后的位置上插入
+                    hilo（了解）
+                    native（我们用的 代表上面三个）
+                    uuid（java api的生成策略）
+                    assigned（自然主键）
+            -->
+            <generator class="native"></generator>
+        </id>
+        <!--其他的属性
+            这里也可以设置数据库中字段的属性
+            type 生成表中的类型
+            length 长度
+            not-null 不为空
+        -->
+        <property name="name" column="name" ></property>
+        <property name="psd" column="psd"></property>
+        <property name="money" column="money"></property>
+
+    </class>
+
+</hibernate-mapping>

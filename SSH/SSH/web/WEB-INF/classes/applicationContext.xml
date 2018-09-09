@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd  http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+         http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+">
+    <!--配置hibernate-->
+    <bean name="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <!-- 第一种方案-->
+        <!--<property name="configLocation" value="classpath:hibernate.cfg.xml"></property>&ndash;&gt;-->
+
+        <property name="dataSource" ref="dataSource"></property>
+        <!--第二种方案-->
+        <property name="hibernateProperties">
+            <props>
+                <!--<prop key="hibernate.connection.driver_class">com.mysql.jdbc.Driver</prop>-->
+                <!--<prop key="hibernate.connection.url">jdbc:mysql://localhost:3306/sshdemo?characterEncoding=utf-8</prop>-->
+                <!--<prop key="hibernate.connection.username">root</prop>-->
+                <!--<prop key="hibernate.connection.password">root</prop>-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+            </props>
+        </property>
+        <property name="mappingDirectoryLocations" value="classpath:cn/hd/entity"></property>
+    </bean>
+    <!--读取数据库配置文件-->
+    <context:property-placeholder location="classpath:db.properties"></context:property-placeholder>
+    <!--配置c3p0连接池-->
+    <bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"></property>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+        <property name="user" value="${jdbc.user}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+    <!--获得事物管理对象-->
+    <bean name="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+    <!--配置事物通知-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="add*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="delete*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="update*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="get*" isolation="DEFAULT" propagation="REQUIRED" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+    <!--将事物织入到目标对象-->
+    <aop:config>
+        <aop:pointcut id="txPc" expression="execution(* cn.hd.service.impl.*ServiceImpl.*(..))"></aop:pointcut>
+        <aop:advisor pointcut-ref="txPc" advice-ref="txAdvice"></aop:advisor>
+    </aop:config>
+
+
+
+
+
+
+
+
+
+    <!--======================action======================================-->
+    <bean name="userAction" class="cn.hd.action.UserAction" scope="prototype">
+        <property name="userService" ref="userService"></property>
+    </bean>
+
+    <!--======================service======================================-->
+    <bean name="userService" class="cn.hd.service.impl.UserServiceImpl">
+        <property name="userDao" ref="userDao"></property>
+    </bean>
+
+
+    <!--======================dao======================================-->
+
+    <bean name="userDao" class="cn.hd.dao.impl.UserDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+
+</beans>

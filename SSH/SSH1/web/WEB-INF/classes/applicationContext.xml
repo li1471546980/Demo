@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd  http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+         http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+">
+
+    <bean name="LoginAction" class="cn.hd.action.GetLoginAction" scope="prototype">
+        <property name="getLoginService" ref="getLoginService"></property>
+    </bean>
+
+    <bean name="getLoginService" class="cn.hd.service.impl.GetLoginServiceImpl">
+        <property name="loginDao" ref="loginDao"></property>
+    </bean>
+
+    <bean name="loginDao" class="cn.hd.dao.impl.LoginDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+
+    <!--将hibernate交由spring管理-->
+    <bean name="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <!--<property name="configLocation" value="classpath:hibernate.cfg.xml"></property>-->
+        <!--引入数据库配置-->
+        <property name="dataSource" ref="dataSource"></property>
+
+        <property name="hibernateProperties">
+            <props>
+                <!--<prop key="hibernate.connection.driver_class">com.mysql.jdbc.Driver</prop>-->
+                <!--<prop key="hibernate.connection.url">jdbc:mysql://localhost/3306/sshdemo</prop>-->
+                <!--<prop key="hibernate.connection.username">root</prop>-->
+                <!--<prop key="hibernate.connection.password">root</prop>-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.show_sql">true</prop>
+            </props>
+        </property>
+        <property name="mappingDirectoryLocations" value="classpath:cn/hd/bean"></property>
+    </bean>
+    <!--读取数据库配置文件-->
+    <context:property-placeholder location="classpath:db.properties"></context:property-placeholder>
+    <!--配置连接池-->
+    <bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"></property>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+        <property name="user" value="${jdbc.user}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+    <!--获得事物管理对象-->
+    <bean name="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+    <!--配置事物通知-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="add*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"></tx:method>
+            <tx:method name="get*" isolation="DEFAULT" propagation="REQUIRED" read-only="true"></tx:method>
+            <tx:method name="delete*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"></tx:method>
+            <tx:method name="update*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"></tx:method>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+        <aop:pointcut id="txPc" expression="execution(* cn.hd.service.impl.*ServiceImpl.*(..))"></aop:pointcut>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPc"></aop:advisor>
+    </aop:config>
+</beans>
